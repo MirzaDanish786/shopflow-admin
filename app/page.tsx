@@ -13,6 +13,9 @@ export default async function DashboardPage() {
       <p style={{ color: "#8b90a0", marginTop: 0, fontSize: 14 }}>
         Every order placed through the storefront.
       </p>
+      <p style={{ color: "#8b90a0", marginTop: 0, fontSize: 14 }}>
+        Add on the UI below the heading
+      </p>
 
       <OrdersTable orders={orders} />
 
