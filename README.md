@@ -1,6 +1,8 @@
 # ShopFlow Admin
 
-A storefront order dashboard. Built with Next.js 14, Supabase and Stripe.
+The admin dashboard for your ShopFlow storefront. See every order the moment
+it comes in, check its status, and manage checkouts, all from one place.
+Built with Next.js 14, Supabase and Stripe.
 
 ## Getting started
 
