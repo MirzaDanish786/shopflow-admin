@@ -10,3 +10,18 @@ export function getSupabase(): SupabaseClient | null {
   if (!client) client = createClient(url, anonKey);
   return client;
 }
+
+export async function getAuthenticatedUser(request: Request) {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+
+  const authHeader = request.headers.get("authorization") ?? "";
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  if (!token) return null;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(token);
+
+  return user;
+}
