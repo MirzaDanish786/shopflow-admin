@@ -2,7 +2,7 @@
 
 import type { Order } from "@/lib/db";
 
-export default function OrdersTable({ orders }: { orders: Order[] }) {
+export default function OrdersTable({ orders }: { orders: Order[] | null }) {
   if (!orders || orders.length === 0) {
     return (
       <p style={{ color: "#8b90a0", fontSize: 14 }}>No orders yet.</p>
