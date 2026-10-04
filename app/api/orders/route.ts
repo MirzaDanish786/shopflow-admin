@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, getAuthenticatedUser } from "@/lib/supabase";
+
+const allowedOrigin = process.env.ALLOWED_ORIGIN;
+if (!allowedOrigin) {
+  throw new Error("ALLOWED_ORIGIN environment variable is not set");
+}
 
 export async function GET() {
   const supabase = getSupabase();
@@ -18,7 +23,7 @@ export async function GET() {
     { orders: data },
     {
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": allowedOrigin,
       },
     },
   );
@@ -27,6 +32,9 @@ export async function GET() {
 export async function POST(request: Request) {
   const supabase = getSupabase();
   if (!supabase) return NextResponse.json({ error: "Not configured" }, { status: 503 });
+
+  const user = await getAuthenticatedUser(request);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
 
@@ -50,6 +58,9 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   const supabase = getSupabase();
   if (!supabase) return NextResponse.json({ error: "Not configured" }, { status: 503 });
+
+  const user = await getAuthenticatedUser(request);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
