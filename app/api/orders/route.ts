@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getSupabase, getAuthenticatedUser } from "@/lib/supabase";
 
+const allowedOrigin = process.env.ALLOWED_ORIGIN;
+if (!allowedOrigin) {
+  throw new Error("ALLOWED_ORIGIN environment variable is not set");
+}
+
 export async function GET() {
   const supabase = getSupabase();
   if (!supabase) return NextResponse.json({ orders: [] });
@@ -18,7 +23,7 @@ export async function GET() {
     { orders: data },
     {
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": allowedOrigin,
       },
     },
   );
