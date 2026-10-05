@@ -9,9 +9,9 @@ export interface Order {
   created_at: string;
 }
 
-export async function listOrders(): Promise<Order[] | null> {
+export async function listOrders(): Promise<Order[]> {
   const supabase = getSupabase();
-  if (!supabase) return null;
+  if (!supabase) return [];
 
   const { data, error } = await supabase
     .from("orders")
@@ -20,7 +20,7 @@ export async function listOrders(): Promise<Order[] | null> {
 
   if (error) {
     console.error(error);
-    return null;
+    return [];
   }
 
   return data as Order[];
