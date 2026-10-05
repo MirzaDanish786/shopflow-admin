@@ -1,12 +1,20 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? "")
+const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-export async function GET(request: Request) {
+function corsHeaders(request: Request) {
+  const origin = request.headers.get("origin");
+  if (origin && allowedOrigins.includes(origin)) {
+    return { "Access-Control-Allow-Origin": origin };
+  }
+  return {};
+}
+
+export async function GET() {
   const supabase = getSupabase();
   if (!supabase) return NextResponse.json({ orders: [] });
 
@@ -19,18 +27,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const requestOrigin = request.headers.get("origin");
-  const headers: Record<string, string> =
-    requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin)
-      ? { "Access-Control-Allow-Origin": requestOrigin }
-      : {};
-
-  return NextResponse.json(
-    { orders: data },
-    {
-      headers,
-    },
-  );
+  return NextResponse.json({ orders: data });
 }
 
 export async function POST(request: Request) {
@@ -38,9 +35,13 @@ export async function POST(request: Request) {
   if (!supabase) return NextResponse.json({ error: "Not configured" }, { status: 503 });
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await request.json();
 
@@ -64,11 +65,6 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   const supabase = getSupabase();
   if (!supabase) return NextResponse.json({ error: "Not configured" }, { status: 503 });
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
