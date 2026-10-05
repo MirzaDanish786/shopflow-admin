@@ -1,6 +1,19 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 
+const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+function corsHeaders(request: Request) {
+  const origin = request.headers.get("origin");
+  if (origin && allowedOrigins.includes(origin)) {
+    return { "Access-Control-Allow-Origin": origin };
+  }
+  return {};
+}
+
 export async function GET() {
   const supabase = getSupabase();
   if (!supabase) return NextResponse.json({ orders: [] });
@@ -14,19 +27,21 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(
-    { orders: data },
-    {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    },
-  );
+  return NextResponse.json({ orders: data });
 }
 
 export async function POST(request: Request) {
   const supabase = getSupabase();
   if (!supabase) return NextResponse.json({ error: "Not configured" }, { status: 503 });
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await request.json();
 

@@ -21,5 +21,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Wrong password" }, { status: 401 });
   }
 
+  resetRateLimit(rateLimitKey);
   return NextResponse.json({ user: data });
 }
