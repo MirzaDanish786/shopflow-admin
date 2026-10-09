@@ -27,7 +27,7 @@ export default function CheckoutButton({ amountCents }: { amountCents: number })
       onClick={startCheckout}
       disabled={loading}
       style={{
-        background: "#7c5cff",
+        background: "#ec4899",
         color: "white",
         border: 0,
         borderRadius: 8,
